@@ -12,7 +12,7 @@ import com.twilio.sdk.resource.instance.*;
 
 public class TwilioUtility {
 	private static final String CONFIG_FILE_PATH = "resources/api.config";
-	private static final String DEFAULT_TWILIO_NUMBER = "+4437974588";
+	private static final String DEFAULT_TWILIO_NUMBER = "5128174588";
 	private static final Pattern ALL_NUMERIC_PATTERN = Pattern.compile("\\d+");
 	
 	public static void main(String [] args){
@@ -30,8 +30,9 @@ public class TwilioUtility {
 			return null;
 		}
 		
-		phoneNumber = phoneNumber.trim().replaceAll("-", "").replaceAll("+", "").replaceAll(" ", "");
+		phoneNumber = phoneNumber.trim().replaceAll("-", "").replace("+", "").replaceAll(" ", "");
 
+		System.out.println(phoneNumber);
 		return ALL_NUMERIC_PATTERN.matcher(phoneNumber).matches() ? "+" + phoneNumber : null;
 	}
 
@@ -126,7 +127,7 @@ public class TwilioUtility {
 			return apiCredentials;
 		}
 
-		phoneNumber = phoneNumber.trim().replaceAll("-", "").replaceAll("+", "").replaceAll(" ", "");
+		phoneNumber = phoneNumber.trim().replaceAll("-", "").replace("+", "").replaceAll(" ", "");
 
 		if (ALL_NUMERIC_PATTERN.matcher(phoneNumber).matches()){
 			try {
@@ -139,7 +140,7 @@ public class TwilioUtility {
 					if (apiCredentialsFound && currentAPICredential < 2 && currentAPICredential >= 0){
 						apiCredentials[currentAPICredential++] = (line == null) ? line : line.trim();
 					} else {
-						line = line.trim().replaceAll("-", "").replaceAll("+", "").replaceAll(" ", "");
+						line = line.trim().replaceAll("-", "").replace("+", "").replaceAll(" ", "");
 						apiCredentialsFound = ALL_NUMERIC_PATTERN.matcher(line).matches() && line.equals(phoneNumber);
 					}
 				}
