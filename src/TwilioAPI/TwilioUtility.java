@@ -12,26 +12,65 @@ import com.twilio.sdk.resource.instance.*;
 
 public class TwilioUtility {
 	private static final String CONFIG_FILE_PATH = "resources/api.config";
-
-	public static void main(String[] args) throws TwilioRestException {
-		TwilioRestClient client = new TwilioRestClient(getAccountSID(), getAuthToken()); 
-
-		List<NameValuePair> params = new ArrayList<NameValuePair>(); 
-		params.add(new BasicNameValuePair("To", "+14437974588")); 
-		params.add(new BasicNameValuePair("From", "+15128174588")); 
-		params.add(new BasicNameValuePair("Body", "John Wall #NBAVote")); 
+	private static final String DEFAULT_TWILIO_NUMBER = "+4437974588";
+	private static final Pattern ALL_NUMERIC_PATTERN = Pattern.compile("\\d+");
+	
+	public static void main(String [] args){
+		sendTextMessage("2024809529", "Hey");
+	}
+	
+	public static boolean sendTextMessage(String fromNumber, String toNumber, String text){
+		final String ACCOUNT_SID = getAccountSIDByPhoneNumber(fromNumber);
+		final String AUTH_TOKEN = getAuthTokenByPhoneNumber(fromNumber);
+		return sendTextMessage(fromNumber, toNumber, text, ACCOUNT_SID, AUTH_TOKEN);
+	}
+	
+	public static String validatePhoneNumber(String phoneNumber){
+		if (phoneNumber == null || phoneNumber.length() < 1 || phoneNumber.equals("+")){
+			return null;
+		}
 		
-		MessageFactory messageFactory = client.getAccount().getMessageFactory(); 
-		Message message = messageFactory.create(params);
-		
-		System.out.println(message.getSid()); 
-	} 
+		phoneNumber = phoneNumber.trim().replaceAll("-", "").replaceAll("+", "").replaceAll(" ", "");
+
+		return ALL_NUMERIC_PATTERN.matcher(phoneNumber).matches() ? "+" + phoneNumber : null;
+	}
+
+	public static boolean sendTextMessage(String fromNumber, String toNumber, String text, String accountSID, String authToken){
+		try{
+			fromNumber = validatePhoneNumber(fromNumber);
+			toNumber = validatePhoneNumber(toNumber);
+			if (text == null || fromNumber == null || toNumber == null || accountSID == null || authToken == null){
+				return false;
+			}
+			TwilioRestClient client = new TwilioRestClient(accountSID, authToken); 
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			
+			params.add(new BasicNameValuePair("To", toNumber)); 
+			params.add(new BasicNameValuePair("From", fromNumber)); 
+			params.add(new BasicNameValuePair("Body", text)); 
+			
+			MessageFactory messageFactory = client.getAccount().getMessageFactory(); 
+			Message message = messageFactory.create(params);
+			System.out.println(message.getStatus());
+			return (message.getStatus() != null);
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/** Sends a text message from the default Twilio Account in the 
+	 	repository (add your own twilio Account phone number to the 
+	 	class level final static String variable) **/
+	public static boolean sendTextMessage(String toNumber, String text){
+		return sendTextMessage(DEFAULT_TWILIO_NUMBER, toNumber, text, getAccountSID(), getAuthToken());
+	}
 
 	private static String getAccountSID() {
 		return loadAPICredentials()[0];
 	}
 
-	public static String getAccountSIDByPhoneNumber(String phoneNumber){
+	private static String getAccountSIDByPhoneNumber(String phoneNumber){
 		return loadAPICredentialsByPhoneNumber(phoneNumber)[0];
 	}
 
@@ -39,7 +78,7 @@ public class TwilioUtility {
 		return loadAPICredentials()[1];
 	}
 
-	public static String getAuthTokenByPhoneNumber(String phoneNumber){
+	private static String getAuthTokenByPhoneNumber(String phoneNumber){
 		return loadAPICredentialsByPhoneNumber(phoneNumber)[1];
 	}
 
@@ -88,9 +127,8 @@ public class TwilioUtility {
 		}
 
 		phoneNumber = phoneNumber.trim().replaceAll("-", "").replaceAll("+", "").replaceAll(" ", "");
-		Pattern pattern = Pattern.compile("\\d+");
 
-		if (pattern.matcher(phoneNumber).matches()){
+		if (ALL_NUMERIC_PATTERN.matcher(phoneNumber).matches()){
 			try {
 				FileReader fileReader = new FileReader(CONFIG_FILE_PATH);
 				BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -102,7 +140,7 @@ public class TwilioUtility {
 						apiCredentials[currentAPICredential++] = (line == null) ? line : line.trim();
 					} else {
 						line = line.trim().replaceAll("-", "").replaceAll("+", "").replaceAll(" ", "");
-						apiCredentialsFound = pattern.matcher(line).matches() && line.equals(phoneNumber);
+						apiCredentialsFound = ALL_NUMERIC_PATTERN.matcher(line).matches() && line.equals(phoneNumber);
 					}
 				}
 			} catch (Exception e){
