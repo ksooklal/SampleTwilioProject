@@ -2,6 +2,6 @@ package TwilioAccounts;
 
 public class TwilioDriver {
 	public static void main(String [] args){
-		MainPhoneNumber.sendNBATexts();
+		DefaultTwilioPhoneNumber.sendText(MainPhoneNumber.PHONE_NUMBER, "Hey");
 	}
 }

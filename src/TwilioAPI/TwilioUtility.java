@@ -12,7 +12,7 @@ import com.twilio.sdk.resource.instance.*;
 
 public class TwilioUtility {
 	private static final String CONFIG_FILE_PATH = "resources/api.config";
-	private static final String DEFAULT_TWILIO_NUMBER = "15128174588";
+	private static final String DEFAULT_TWILIO_NUMBER = getTwilioNumber(); //Enter your Twilio phone number here
 	private static final Pattern ALL_NUMERIC_PATTERN = Pattern.compile("\\d+");
 
 	public static boolean sendTextMessage(String fromNumber, String toNumber, String text){
@@ -20,15 +20,14 @@ public class TwilioUtility {
 		final String AUTH_TOKEN = getAuthTokenByPhoneNumber(fromNumber);
 		return sendTextMessage(fromNumber, toNumber, text, ACCOUNT_SID, AUTH_TOKEN);
 	}
-	
+
 	public static String validatePhoneNumber(String phoneNumber){
 		if (phoneNumber == null || phoneNumber.length() < 1 || phoneNumber.equals("+")){
 			return null;
 		}
-		
+
 		phoneNumber = phoneNumber.trim().replaceAll("-", "").replace("+", "").replaceAll(" ", "");
 
-		System.out.println(phoneNumber);
 		return ALL_NUMERIC_PATTERN.matcher(phoneNumber).matches() ? "+" + phoneNumber : null;
 	}
 
@@ -41,21 +40,21 @@ public class TwilioUtility {
 			}
 			TwilioRestClient client = new TwilioRestClient(accountSID, authToken); 
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			
+
 			params.add(new BasicNameValuePair("To", toNumber)); 
 			params.add(new BasicNameValuePair("From", fromNumber)); 
 			params.add(new BasicNameValuePair("Body", text)); 
-			
+
 			MessageFactory messageFactory = client.getAccount().getMessageFactory(); 
 			Message message = messageFactory.create(params);
-			System.out.println(message.getStatus());
+
 			return (message.getStatus() != null);
 		} catch (Exception e){
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
+
 	/** Sends a text message from the default Twilio Account in the 
 	 	repository (add your own twilio Account phone number to the 
 	 	class level final static String variable) **/
@@ -108,6 +107,55 @@ public class TwilioUtility {
 		return apiCredentials;
 	}
 
+	/** Finds the personal phone number in the config file (not included in public
+		GitHub repository) associated with the phrase "Personal Phone Number:"
+		
+  		@return Phone Number
+	 **/
+	@SuppressWarnings("resource")
+	public static final String getPersonalPhoneNumber(){
+		String line = null;
+		String personalPhoneNumber = null;
+
+		try {
+			FileReader fileReader = new FileReader(CONFIG_FILE_PATH);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			
+			while((line = bufferedReader.readLine()) != null) {
+				if (line != null && line.indexOf("Personal Phone Number:") >= 0){
+					String [] lineSplit = line.split(":");
+					personalPhoneNumber = (lineSplit != null && lineSplit.length > 1 && lineSplit[1] != null) ? lineSplit[1].trim() : null;
+					return personalPhoneNumber;
+				}
+			}
+		} catch (Exception e){
+			return personalPhoneNumber;
+		}
+		return personalPhoneNumber;
+	}
+	
+	@SuppressWarnings("resource")
+	public static final String getTwilioNumber(){
+		String line = null;
+		String personalPhoneNumber = null;
+
+		try {
+			FileReader fileReader = new FileReader(CONFIG_FILE_PATH);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			
+			while((line = bufferedReader.readLine()) != null) {
+				if (line != null && line.indexOf("Twilio Phone Number:") >= 0){
+					String [] lineSplit = line.split(":");
+					personalPhoneNumber = (lineSplit != null && lineSplit.length > 1 && lineSplit[1] != null) ? lineSplit[1].trim() : null;
+					return personalPhoneNumber;
+				}
+			}
+		} catch (Exception e){
+			return personalPhoneNumber;
+		}
+		return personalPhoneNumber;
+	}
+	
 	/** Finds the API Credentials (ACCOUNT_SID and AUTH_TOKEN) that correspond to 
 	 	given phone number and returns them as a pair of Strings in a String array 
 

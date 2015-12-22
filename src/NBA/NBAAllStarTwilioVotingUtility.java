@@ -39,9 +39,9 @@ public final class NBAAllStarTwilioVotingUtility {
 		return easternTexts;
 	}
 	
-	public static void sendNBATexts(String twitterHandle) {
+	public static void sendNBATexts(String phoneNumber) {
 		for (String text: getNBATexts()){
-			TwilioUtility.sendTextMessage(NBA_VOTING_TEXT_MESSAGE_NUMBER, text);
+			TwilioUtility.sendTextMessage(phoneNumber, NBA_VOTING_TEXT_MESSAGE_NUMBER, text);
 		}
 	}
 }
