@@ -12,13 +12,9 @@ import com.twilio.sdk.resource.instance.*;
 
 public class TwilioUtility {
 	private static final String CONFIG_FILE_PATH = "resources/api.config";
-	private static final String DEFAULT_TWILIO_NUMBER = "5128174588";
+	private static final String DEFAULT_TWILIO_NUMBER = "15128174588";
 	private static final Pattern ALL_NUMERIC_PATTERN = Pattern.compile("\\d+");
-	
-	public static void main(String [] args){
-		sendTextMessage("2024809529", "Hey");
-	}
-	
+
 	public static boolean sendTextMessage(String fromNumber, String toNumber, String text){
 		final String ACCOUNT_SID = getAccountSIDByPhoneNumber(fromNumber);
 		final String AUTH_TOKEN = getAuthTokenByPhoneNumber(fromNumber);
